@@ -42,7 +42,9 @@ Status: initial CLI wrapper drafted (fortress-guard).
 - Extends the existing fortress-guard tool.
 - Isolates unsafe or unknown command execution before it can cause
   damage, instead of scanning for known signatures afterwards.
-- Globally toggleable, same system flag as the rest.
+- No separate mode toggle. If the command runs under sudo, it is
+  trusted and runs directly. If not, and it matches a known dangerous
+  pattern, it runs sandboxed instead.
 
 ### 4. Notifications and UI
 
@@ -53,12 +55,6 @@ Status: not started.
   lose recent data (for example, rolling back over changes made in the
   last few hours). The user confirms within 5 minutes, otherwise the
   system picks the safe option automatically.
-
-## Global flag
-
-A single system-wide switch controls the protection level. It can be
-fully disabled, like an antivirus, but is native rather than a separate
-process.
 
 ## Known development constraints
 
