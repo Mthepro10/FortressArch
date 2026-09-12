@@ -1,14 +1,4 @@
 #!/usr/bin/env bash
-# fortress-snapshot.sh
-# Creeaza un snapshot snapper INAINTE de un update riscant (kernel, drivere).
-#
-# Prerechizite (nu functioneaza fara ele):
-#   - sistemul de fisiere root este btrfs
-#   - snapper e instalat si are o configuratie numita "root"
-#     (creata cu: snapper -c root create-config /)
-#
-# Acest script e apelat automat de pacman hook-ul din
-# self-heal/pacman-hooks/95-fortress-snapshot.hook
 
 set -euo pipefail
 
