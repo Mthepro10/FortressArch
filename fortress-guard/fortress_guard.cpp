@@ -1,12 +1,9 @@
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
 #include <unistd.h>
 #include <cstring>
 #include <cerrno>
-
-const std::string FORTRESS_FLAG_PATH = "/etc/os-fortress-mode";
 
 const std::vector<std::string> DANGEROUS_PREFIXES = {
     "rm -rf",
@@ -20,14 +17,8 @@ const std::vector<std::string> DANGEROUS_PREFIXES = {
     ":(){ :|:& };:"
 };
 
-bool isExpertModeEnabled() {
-    std::ifstream flagFile(FORTRESS_FLAG_PATH);
-    if (!flagFile.is_open()) {
-        return false;
-    }
-    std::string content;
-    std::getline(flagFile, content);
-    return content == "enabled";
+bool isRunningAsRoot() {
+    return geteuid() == 0;
 }
 
 bool isDangerousCommand(const std::string& command) {
@@ -90,10 +81,10 @@ int main(int argc, char* argv[]) {
         fullCommand += a + " ";
     }
 
-    bool expertMode = isExpertModeEnabled();
+    bool asRoot = isRunningAsRoot();
     bool dangerous = isDangerousCommand(fullCommand);
 
-    if (dangerous && !expertMode) {
+    if (dangerous && !asRoot) {
         std::cout << "[fortress-guard] Dangerous command detected. Running sandboxed." << std::endl;
         return runSandboxed(args);
     }
