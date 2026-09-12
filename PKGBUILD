@@ -1,0 +1,21 @@
+pkgname=fortress-guard
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Wrapper that isolates dangerous commands in bubblewrap, with an Expert Mode toggle"
+arch=('x86_64')
+url="https://github.com/Mthepro10/FortressArch"
+license=('MIT')
+depends=('bubblewrap' 'gcc-libs')
+makedepends=('gcc')
+source=("fortress_guard.cpp")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir"
+    g++ -O2 -Wall -o fortress-guard fortress_guard.cpp
+}
+
+package() {
+    cd "$srcdir"
+    install -Dm755 fortress-guard "$pkgdir/usr/bin/fortress-guard"
+}
