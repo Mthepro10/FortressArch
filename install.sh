@@ -17,7 +17,10 @@ install -Dm644 "$REPO_DIR"/self-heal/systemd/10-fortress-limits.conf -t /etc/sys
 systemctl daemon-reload
 systemctl enable fortress-boot-attempt.service
 systemctl enable fortress-boot-success.service
+systemctl enable fortress-boot-rollback.service
 systemctl enable fortress-health-check.timer
+
+/usr/local/bin/fortress-state-setup.sh
 
 if ! snapper -c root list &> /dev/null; then
     echo "snapper config 'root' not found."
