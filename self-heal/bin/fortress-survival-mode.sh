@@ -13,10 +13,10 @@ fi
 
 logger -t "$LOG_TAG" "entering survival mode"
 
+echo "$(date --iso-8601=seconds)" > "$FLAG_FILE"
+
 mount -o remount,ro /
 
 systemctl isolate multi-user.target
-
-echo "$(date --iso-8601=seconds)" > "$FLAG_FILE"
 
 logger -t "$LOG_TAG" "survival mode active, waiting for user input"
