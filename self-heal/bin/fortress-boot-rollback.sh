@@ -28,7 +28,7 @@ fi
 
 echo "rollback-to-$LATEST_SNAPSHOT-$(date +%Y%m%d-%H%M%S)" > "$STATE_DIR/last-action"
 
-snapper -c "$SNAPPER_CONFIG" rollback "$LATEST_SNAPSHOT"
+snapper -c "$SNAPPER_CONFIG" --ambit classic rollback "$LATEST_SNAPSHOT"
 
 echo 0 > "$COUNTER_FILE"
 rm -f "$PENDING_FLAG"
