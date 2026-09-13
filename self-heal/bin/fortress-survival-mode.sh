@@ -15,7 +15,21 @@ logger -t "$LOG_TAG" "entering survival mode"
 
 echo "$(date --iso-8601=seconds)" > "$FLAG_FILE"
 
-mount -o remount,ro /
+sync
+
+REMOUNT_OK=0
+for attempt in 1 2 3; do
+    if mount -o remount,ro / 2>/dev/null; then
+        REMOUNT_OK=1
+        break
+    fi
+    sleep 2
+    sync
+done
+
+if [[ "$REMOUNT_OK" -eq 0 ]]; then
+    logger -t "$LOG_TAG" "could not remount root read-only after 3 attempts, continuing with service isolation only"
+fi
 
 systemctl isolate multi-user.target
 
