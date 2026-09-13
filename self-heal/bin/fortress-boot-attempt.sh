@@ -13,7 +13,8 @@ if [[ ! -f "$COUNTER_FILE" ]]; then
     echo 0 > "$COUNTER_FILE"
 fi
 
-COUNT=$(cat "$COUNTER_FILE")
+COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo 0)
+[[ "$COUNT" =~ ^[0-9]+$ ]] || COUNT=0
 COUNT=$((COUNT + 1))
 echo "$COUNT" > "$COUNTER_FILE"
 
