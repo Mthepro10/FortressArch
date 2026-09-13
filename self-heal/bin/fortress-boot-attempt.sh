@@ -43,4 +43,4 @@ snapper -c "$SNAPPER_CONFIG" rollback "$LATEST_SNAPSHOT"
 echo 0 > "$COUNTER_FILE"
 
 logger -t "$LOG_TAG" "rolled back to snapshot $LATEST_SNAPSHOT, rebooting"
-systemctl reboot
+reboot -f
