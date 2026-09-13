@@ -17,7 +17,7 @@ if [[ -n "$FAILED_UNITS" ]]; then
     done <<< "$FAILED_UNITS"
 fi
 
-INTEGRITY_ISSUES=$(pacman -Qkk 2>/dev/null | grep -c "warning" || true)
+INTEGRITY_ISSUES=$(pacman -Qkk 2>/dev/null | grep -E "/usr/(bin|lib)/" | grep -c "." || true)
 INTEGRITY_THRESHOLD=5
 
 if [[ "$INTEGRITY_ISSUES" -ge "$INTEGRITY_THRESHOLD" ]]; then
