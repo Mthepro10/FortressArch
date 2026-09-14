@@ -19,7 +19,7 @@ if mountpoint -q "$STATE_DIR"; then
     exit 0
 fi
 
-ROOT_DEVICE=$(findmnt -no SOURCE /)
+ROOT_DEVICE=$(findmnt -no SOURCE / | sed 's/\[.*//')
 ROOT_UUID=$(findmnt -no UUID /)
 
 MOUNT_TMP=$(mktemp -d)
