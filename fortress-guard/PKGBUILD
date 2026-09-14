@@ -5,7 +5,7 @@ pkgdesc="Wrapper that isolates dangerous commands in bubblewrap unless run with 
 arch=('x86_64')
 url="https://github.com/Mthepro10/FortressArch"
 license=('MIT')
-depends=('bubblewrap' 'gcc-libs')
+depends=('bubblewrap' 'gcc-libs' 'libnotify')
 makedepends=('gcc')
 source=("fortress_guard.cpp")
 sha256sums=('SKIP')
@@ -19,5 +19,6 @@ package() {
     cd "$srcdir"
     install -Dm755 fortress-guard "$pkgdir/usr/bin/fortress-guard"
 }
+
 
 
