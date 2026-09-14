@@ -21,8 +21,8 @@ INTEGRITY_ISSUES=$(pacman -Qkk 2>/dev/null | grep -E "/usr/(bin|lib)/" | grep -c
 INTEGRITY_THRESHOLD=5
 
 if [[ "$INTEGRITY_ISSUES" -ge "$INTEGRITY_THRESHOLD" ]]; then
-    logger -t "$LOG_TAG" "integrity issues found: $INTEGRITY_ISSUES, entering survival mode"
-    /usr/local/bin/fortress-survival-mode.sh
+    logger -t "$LOG_TAG" "integrity issues found: $INTEGRITY_ISSUES, requesting user confirmation"
+    touch "$STATE_DIR/survival-prompt-needed"
 fi
 
 ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
