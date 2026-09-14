@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <cerrno>
+#include <sys/wait.h>
 
 const std::vector<std::string> DANGEROUS_PREFIXES = {
     "rm -rf",
@@ -37,6 +38,17 @@ std::vector<char*> toExecArgs(const std::vector<std::string>& args) {
     }
     execArgs.push_back(nullptr);
     return execArgs;
+}
+
+void notifyUser(const std::string& message) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        execlp("notify-send", "notify-send", "fortress-guard", message.c_str(), (char*)nullptr);
+        _exit(1);
+    } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+    }
 }
 
 int runDirect(const std::vector<std::string>& args) {
@@ -74,11 +86,23 @@ int runSandboxed(const std::vector<std::string>& args) {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: fortress-guard <command> [arguments...]" << std::endl;
+        std::cerr << "Usage: fortress-guard [--sandbox] <command> [arguments...]" << std::endl;
         return 1;
     }
 
-    std::vector<std::string> args(argv + 1, argv + argc);
+    int argStart = 1;
+    bool forceSandbox = false;
+
+    if (std::string(argv[1]) == "--sandbox") {
+        forceSandbox = true;
+        argStart = 2;
+        if (argc < 3) {
+            std::cerr << "Usage: fortress-guard --sandbox <command> [arguments...]" << std::endl;
+            return 1;
+        }
+    }
+
+    std::vector<std::string> args(argv + argStart, argv + argc);
 
     std::string fullCommand;
     for (auto& a : args) {
@@ -88,8 +112,12 @@ int main(int argc, char* argv[]) {
     bool asRoot = isRunningAsRoot();
     bool dangerous = isDangerousCommand(fullCommand);
 
-    if (dangerous && !asRoot) {
-        std::cout << "[fortress-guard] Dangerous command detected. Running sandboxed." << std::endl;
+    if (forceSandbox || (dangerous && !asRoot)) {
+        std::string reason = forceSandbox
+            ? "Running in an isolated sandbox by request"
+            : "Dangerous command detected, running in an isolated sandbox";
+        std::cout << "[fortress-guard] " << reason << "." << std::endl;
+        notifyUser(reason + ": " + fullCommand);
         return runSandboxed(args);
     }
 
