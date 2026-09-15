@@ -26,6 +26,7 @@ systemctl enable fortress-boot-rollback.service
 systemctl enable fortress-health-check.timer
 
 /usr/local/bin/fortress-state-setup.sh
+/usr/local/bin/fortress-ignore-lock.sh
 
 if ! snapper -c root list &> /dev/null; then
     echo "snapper config 'root' not found."
