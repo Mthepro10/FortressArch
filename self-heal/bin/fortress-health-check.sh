@@ -26,6 +26,13 @@ if [[ -f "$STALE_LOCK" ]] && ! pgrep -x pacman &> /dev/null; then
 fi
 
 INTEGRITY_LINES=$(pacman -Qkk 2>/dev/null | grep -oE "/(usr/(bin|lib)|boot)/[^ ]+" || true)
+
+IGNORE_FILE="/etc/fortress-arch/ignore"
+if [[ -f "$IGNORE_FILE" && -s "$IGNORE_FILE" ]]; then
+    INTEGRITY_LINES=$(echo "$INTEGRITY_LINES" | grep -vFf "$IGNORE_FILE" || true)
+    logger -t "$LOG_TAG" "applied ignore file filters from $IGNORE_FILE"
+fi
+
 INTEGRITY_ISSUES=$(echo "$INTEGRITY_LINES" | grep -c "." || true)
 
 if [[ "$INTEGRITY_ISSUES" -ge "$INTEGRITY_THRESHOLD" ]]; then
@@ -35,7 +42,11 @@ if [[ "$INTEGRITY_ISSUES" -ge "$INTEGRITY_THRESHOLD" ]]; then
         pacman -S --noconfirm --overwrite '*' "$pkg" || logger -t "$LOG_TAG" "failed to repair $pkg"
     done
 
-    REMAINING=$(pacman -Qkk 2>/dev/null | grep -oE "/(usr/(bin|lib)|boot)/[^ ]+" | grep -c "." || true)
+    REMAINING=$(pacman -Qkk 2>/dev/null | grep -oE "/(usr/(bin|lib)|boot)/[^ ]+" || true)
+    if [[ -f "$IGNORE_FILE" && -s "$IGNORE_FILE" ]]; then
+        REMAINING=$(echo "$REMAINING" | grep -vFf "$IGNORE_FILE" || true)
+    fi
+    REMAINING=$(echo "$REMAINING" | grep -c "." || true)
     if [[ "$REMAINING" -ge "$INTEGRITY_THRESHOLD" ]]; then
         logger -t "$LOG_TAG" "repair did not resolve all issues, requesting user confirmation"
         touch "$STATE_DIR/survival-prompt-needed"
