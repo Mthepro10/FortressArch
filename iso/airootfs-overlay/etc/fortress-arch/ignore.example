@@ -1,0 +1,6 @@
+# /etc/fortress-arch/ignore
+# One path per line, matched literally (grep -F) against pacman -Qkk output.
+# Edit only with: sudo fortress-ignore-edit.sh
+#
+# Example:
+# /usr/bin/my-patched-tool
