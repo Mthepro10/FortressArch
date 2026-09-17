@@ -1,0 +1,28 @@
+---
+componentName: fortressarch
+
+strings:
+    productName:         FortressArch
+    shortProductName:    FortressArch
+    version:             1.0
+    shortVersion:        1.0
+    versionedName:       FortressArch 1.0
+    shortVersionedName:  FortressArch 1.0
+    bootloaderEntryName: FortressArch
+    productUrl:          https://github.com/Mthepro10/FortressArch
+    supportUrl:          https://github.com/Mthepro10/FortressArch/issues
+    knownIssuesUrl:      https://github.com/Mthepro10/FortressArch/issues
+    releaseNotesUrl:     https://github.com/Mthepro10/FortressArch
+    donateUrl:           https://github.com/Mthepro10/FortressArch
+
+images:
+    productLogo:         "logo.svg"
+    productIcon:         "logo.svg"
+    productWelcome:      "welcome.svg"
+
+slideshow: "show.qml"
+
+style:
+   sidebarBackground:    "#1a1a2e"
+   sidebarText:          "#eaeaea"
+   sidebarTextSelect:    "#f5c518"
