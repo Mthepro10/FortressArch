@@ -4,43 +4,83 @@ This profile is a delta on top of Arch's official `releng` archiso profile.
 We do not maintain our own profiledef.sh or pacman.conf — we reuse the
 official ones and only add what FortressArch needs.
 
+This is the full, current build flow, meant to be done in ONE pass.
+
 ## Requirements
 
 Run this inside an Arch environment (VM), not on Windows or Ubuntu:
 
 ```
-sudo pacman -S archiso git
+sudo pacman -S archiso git base-devel pacman-contrib
 ```
 
-## Steps
-
-1. Copy the official releng profile to a working directory:
+## Step 1: build our own packages on the host, before touching archiso
 
 ```
+cd ~/FortressArch/fortress-guard
+makepkg -s --noconfirm
+
+cd ~/FortressArch/packaging/fortressarch-selfheal
+makepkg -s --noconfirm
+```
+
+## Step 2: set up the profile
+
+```
+rm -rf ~/fortressarch-iso /tmp/archiso-work
 cp -r /usr/share/archiso/configs/releng ~/fortressarch-iso
 cd ~/fortressarch-iso
 ```
 
-2. Merge our extra packages into packages.x86_64:
+## Step 3: merge our packages list
 
 ```
 cat ~/FortressArch/iso/packages-extra.txt >> packages.x86_64
 ```
 
-3. Merge our airootfs overlay into the profile's airootfs:
+## Step 4: merge our airootfs overlay
 
 ```
 cp -r ~/FortressArch/iso/airootfs-overlay/* airootfs/
 ```
 
-4. Append our customization step to the end of airootfs/root/customize_airootfs.sh:
+## Step 5: append our customization step
 
 ```
 cat ~/FortressArch/iso/customize-fortress.sh >> airootfs/root/customize_airootfs.sh
 ```
 
-5. Edit profiledef.sh: add the following entries inside the existing
-   file_permissions=(...) array (do not replace the array, add to it):
+## Step 6: add our own local package repo (fortress-guard + fortressarch-selfheal)
+
+```
+mkdir -p airootfs/root/local-repo
+cp ~/FortressArch/fortress-guard/*.pkg.tar.zst airootfs/root/local-repo/
+cp ~/FortressArch/packaging/fortressarch-selfheal/*.pkg.tar.zst airootfs/root/local-repo/
+repo-add airootfs/root/local-repo/custom.db.tar.gz airootfs/root/local-repo/*.pkg.tar.zst
+```
+
+Edit `pacman.conf` (the one in this profile directory, not the system one):
+
+```
+nano pacman.conf
+```
+
+Add this near the top, before the `[core]` section:
+
+```
+[custom]
+SigLevel = Optional TrustAll
+Server = file:///root/local-repo
+```
+
+## Step 7: edit profiledef.sh
+
+```
+nano profiledef.sh
+```
+
+Add these lines inside the existing `file_permissions=(...)` array (do
+not replace the array, add to it):
 
 ```
 ["/usr/local/bin/fortress-boot-attempt.sh"]="0:0:755"
@@ -58,25 +98,39 @@ cat ~/FortressArch/iso/customize-fortress.sh >> airootfs/root/customize_airootfs
 ["/etc/sudoers.d/fortress-survival"]="0:0:440"
 ```
 
-6. Also edit profiledef.sh: change `iso_name`, `iso_label`, and
-   `iso_publisher` to FortressArch instead of Arch Linux.
+Also change `iso_name`, `iso_label`, and `iso_publisher` to FortressArch.
 
-7. Build the ISO:
+## Step 8: build
 
 ```
-mkarchiso -v -w /tmp/archiso-work -o ~/fortressarch-out .
+sudo mkarchiso -v -w /tmp/archiso-work -o ~/fortressarch-out .
 ```
 
 The resulting ISO appears in ~/fortressarch-out.
 
-## Known gaps for this stage
+## After booting the ISO: installing with archinstall
 
-- snapper is installed but not configured with `snapper -c root create-config /`
-  inside the ISO, because there is no real target root filesystem yet at
-  build time. This has to happen after the live installer creates the real
-  partitions — this is exactly what Calamares needs to do in the next
-  project phase, not something archiso itself can do.
-- No graphical installer yet. Booting this ISO currently drops into a live
-  shell, not a friendly installer. That is the next module (Calamares).
-- Not tested yet. This is a first pass, written without an Arch machine
-  available to actually run mkarchiso.
+archinstall is included in the live environment. Boot the ISO, run
+`archinstall`, go through the guided steps, and when it asks for
+additional packages, type:
+
+```
+fortress-guard fortressarch-selfheal
+```
+
+archinstall's pacstrap step will pull both from our local repo (already
+registered in this image's pacman.conf) and run their install hooks on
+the real target automatically. This handles enabling services,
+validating the sudoers file, enabling os-prober for dual boot, and
+configuring snapper plus state isolation on the target disk — no manual
+steps needed after install.
+
+## Known gaps
+
+- Not tested yet end to end. This is a first pass through the full
+  archinstall-based flow, written without an Arch machine available to
+  run it directly.
+- Watch closely for whether pacstrap can actually reach a repo at
+  `file:///root/local-repo` in the target chroot context; if not, the
+  packages may need to be copied to a path reachable from both the live
+  root and the pacstrap chroot instead.

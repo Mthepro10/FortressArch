@@ -1,0 +1,19 @@
+pkgname=fortressarch-selfheal
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="FortressArch self-healing scripts, services, and hooks"
+arch=('x86_64')
+url="https://github.com/Mthepro10/FortressArch"
+license=('MIT')
+depends=('bubblewrap' 'snapper' 'grub-btrfs' 'inotify-tools' 'libnotify' 'python-gobject' 'gtk4' 'sudo')
+install=fortressarch-selfheal.install
+source=()
+sha256sums=()
+
+package() {
+    cp -a "$startdir"/files/usr "$pkgdir"/
+    cp -a "$startdir"/files/etc "$pkgdir"/
+
+    chmod -R 755 "$pkgdir"/usr/local/bin
+    chmod 440 "$pkgdir"/etc/sudoers.d/fortress-survival
+}

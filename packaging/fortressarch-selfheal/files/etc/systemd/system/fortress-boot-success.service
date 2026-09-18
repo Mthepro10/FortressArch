@@ -1,0 +1,10 @@
+[Unit]
+Description=FortressArch: mark boot as successful
+After=multi-user.target graphical.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/fortress-boot-success.sh
+
+[Install]
+WantedBy=multi-user.target

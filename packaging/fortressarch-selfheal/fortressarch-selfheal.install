@@ -1,0 +1,31 @@
+post_install() {
+    systemctl enable fortress-boot-attempt.service
+    systemctl enable fortress-boot-success.service
+    systemctl enable fortress-boot-rollback.service
+    systemctl enable fortress-health-check.timer
+    systemctl --global enable fortress-notify-daemon.service
+
+    if command -v visudo &> /dev/null; then
+        visudo -c -f /etc/sudoers.d/fortress-survival || echo "WARNING: fortress-survival sudoers file failed validation"
+    fi
+
+    if grep -q "^#GRUB_DISABLE_OS_PROBER=false" /etc/default/grub 2>/dev/null; then
+        sed -i 's/^#GRUB_DISABLE_OS_PROBER=false/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
+    fi
+    if ! grep -q "^GRUB_DISABLE_OS_PROBER=false" /etc/default/grub 2>/dev/null; then
+        echo "GRUB_DISABLE_OS_PROBER=false" >> /etc/default/grub
+    fi
+
+    if findmnt -t btrfs / &> /dev/null; then
+        if ! snapper -c root list &> /dev/null; then
+            snapper -c root create-config / || echo "WARNING: snapper config creation failed"
+        fi
+        if [ -x /usr/local/bin/fortress-state-setup.sh ]; then
+            /usr/local/bin/fortress-state-setup.sh || echo "WARNING: fortress-state-setup.sh failed"
+        fi
+    else
+        echo "Root filesystem is not btrfs; snapshot and rollback features will not be available."
+    fi
+
+    echo "FortressArch self-healing services installed and enabled."
+}
