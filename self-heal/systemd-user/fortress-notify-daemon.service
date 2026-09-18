@@ -1,0 +1,11 @@
+[Unit]
+Description=FortressArch: desktop notification daemon
+
+[Service]
+ExecStart=/usr/local/bin/fortress-notify-daemon.sh
+Restart=always
+
+[Install]
+WantedBy=default.target
+
+
