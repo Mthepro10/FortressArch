@@ -1,0 +1,6 @@
+[Unit]
+Description=FortressArch: run system health check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/fortress-health-check.sh

@@ -1,0 +1,15 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = linux
+Target = linux-lts
+Target = linux-zen
+Target = nvidia
+Target = nvidia-dkms
+Target = nvidia-open-dkms
+
+[Action]
+Description = FortressArch: creating snapshot before critical update...
+When = PreTransaction
+Exec = /usr/local/bin/fortress-snapshot.sh

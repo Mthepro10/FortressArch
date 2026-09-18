@@ -1,0 +1,11 @@
+[Unit]
+Description=FortressArch: perform pending rollback if needed
+After=basic.target
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/fortress-boot-rollback.sh
+
+[Install]
+WantedBy=multi-user.target
